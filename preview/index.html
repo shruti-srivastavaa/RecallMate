@@ -1,0 +1,1896 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Memory Assistant — Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            background: #000;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            color: #fff;
+            overflow-x: hidden
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 20px 20px
+        }
+
+        .header h1 {
+            font-size: 32px;
+            background: linear-gradient(90deg, #22d3ee, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+            font-weight: 800;
+            letter-spacing: -0.5px
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, .6);
+            font-size: 14px
+        }
+
+        .badges {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 12px;
+            flex-wrap: wrap
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(34, 211, 238, .1);
+            color: #22d3ee;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid rgba(34, 211, 238, .2)
+        }
+
+        .phone {
+            width: 390px;
+            height: 844px;
+            background: #000;
+            border-radius: 50px;
+            border: 8px solid #1c1c1e;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 50px rgba(34, 211, 238, .1);
+            margin-bottom: 40px
+        }
+
+        .notch {
+            width: 120px;
+            height: 30px;
+            background: #1c1c1e;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            z-index: 100
+        }
+
+        .screen {
+            padding: 44px 16px 80px;
+            overflow-y: auto;
+            height: 100%;
+            background: linear-gradient(180deg, #050510 0%, #0a0a1a 100%)
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        .page {
+            display: none;
+            animation: fadePage .4s cubic-bezier(0.2, 0.8, 0.2, 1)
+        }
+
+        @keyframes fadePage {
+            from {
+                opacity: 0;
+                transform: scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .page.active {
+            display: block
+        }
+
+        .glass {
+            background: rgba(30, 30, 40, .6);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 16px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2)
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 16px 28px;
+            border-top: 0.5px solid rgba(255, 255, 255, .1);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 15, .85);
+            backdrop-filter: blur(30px)
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            color: rgba(255, 255, 255, .3);
+            cursor: pointer;
+            transition: .3s;
+            width: 60px
+        }
+
+        .nav-item span {
+            font-size: 20px;
+            transition: .3s;
+        }
+
+        .nav-item.active {
+            color: #22d3ee
+        }
+
+        .nav-item.active span {
+            transform: translateY(-2px);
+            text-shadow: 0 0 10px rgba(34, 211, 238, .5)
+        }
+
+        /* Home */
+        .home-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0 20px
+        }
+
+        .home-header h2 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 0.5px
+        }
+
+        .home-header small {
+            color: #a78bfa;
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px
+        }
+
+        .header-btns {
+            display: flex;
+            gap: 12px
+        }
+
+        .header-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: .2s;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid rgba(255, 255, 255, .1)
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, .15)
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            margin-bottom: 24px;
+            cursor: pointer;
+            transition: .3s;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, .08)
+        }
+
+        .search-bar:hover {
+            background: rgba(255, 255, 255, .12);
+            box-shadow: 0 0 15px rgba(34, 211, 238, .15)
+        }
+
+        .search-bar span:first-child {
+            font-size: 18px
+        }
+
+        .search-bar span:nth-child(2) {
+            color: rgba(255, 255, 255, .5);
+            font-size: 15px;
+            flex: 1
+        }
+
+        .stats {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px
+        }
+
+        .stat-card {
+            flex: 1;
+            text-align: center;
+            padding: 16px 10px
+        }
+
+        .stat-card .icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, .3))
+        }
+
+        .stat-card .val {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(90deg, #fff, #bbb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-card .lbl {
+            font-size: 11px;
+            color: rgba(255, 255, 255, .4);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px
+        }
+
+        /* Feature Cards */
+        .features-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 4px 4px 20px;
+            -webkit-overflow-scrolling: touch
+        }
+
+        .features-scroll::-webkit-scrollbar {
+            display: none
+        }
+
+        .feature-card {
+            min-width: 140px;
+            padding: 16px;
+            cursor: pointer;
+            transition: .3s;
+            position: relative;
+            overflow: hidden
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #22d3ee, #a78bfa);
+            opacity: 0;
+            transition: .3s
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3)
+        }
+
+        .feature-card:hover::before {
+            opacity: 1
+        }
+
+        .feature-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3)
+        }
+
+        .feature-card h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px
+        }
+
+        .feature-card p {
+            font-size: 11px;
+            color: rgba(255, 255, 255, .5);
+            line-height: 1.4
+        }
+
+        .cat-scroll {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            margin-bottom: 24px;
+            padding: 2px 0
+        }
+
+        .cat-scroll::-webkit-scrollbar {
+            display: none
+        }
+
+        .cat-chip {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            background: rgba(255, 255, 255, .08);
+            color: rgba(255, 255, 255, .6);
+            transition: .3s;
+            border: 1px solid transparent
+        }
+
+        .cat-chip.active {
+            background: rgba(34, 211, 238, .15);
+            color: #22d3ee;
+            border-color: rgba(34, 211, 238, .3);
+            text-shadow: 0 0 8px rgba(34, 211, 238, .4)
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 0 4px
+        }
+
+        .section-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff
+        }
+
+        .section-header a {
+            font-size: 13px;
+            color: #a78bfa;
+            cursor: pointer;
+            font-weight: 600
+        }
+
+        .memory-card {
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 14px;
+            cursor: pointer;
+            transition: .2s;
+            align-items: flex-start
+        }
+
+        .memory-card:hover {
+            border-color: rgba(34, 211, 238, .3);
+            background: rgba(34, 211, 238, .05)
+        }
+
+        .memory-card .m-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background: rgba(255, 255, 255, .05);
+            flex-shrink: 0
+        }
+
+        .memory-card .m-body {
+            flex: 1
+        }
+
+        .memory-card .m-body h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            line-height: 1.3
+        }
+
+        .memory-card .m-body p {
+            font-size: 13px;
+            color: rgba(255, 255, 255, .5);
+            line-height: 1.4;
+            margin-bottom: 6px
+        }
+
+        .memory-card .m-body small {
+            font-size: 11px;
+            color: rgba(255, 255, 255, .3);
+            font-weight: 500
+        }
+
+        .memory-card .m-star {
+            color: #fbbf24;
+            font-size: 14px;
+            filter: drop-shadow(0 0 4px rgba(251, 191, 36, .5))
+        }
+
+        /* Graph */
+        .graph-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0 20px
+        }
+
+        .graph-header h2 {
+            font-size: 24px;
+            font-weight: 700
+        }
+
+        .graph-done {
+            color: #a78bfa;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 6px 12px;
+            background: rgba(167, 139, 250, .1);
+            border-radius: 20px
+        }
+
+        canvas#graphCanvas {
+            width: 100%;
+            height: 420px;
+            border-radius: 20px;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #050510 100%);
+            border: 1px solid rgba(255, 255, 255, .1)
+        }
+
+        .graph-legend {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            justify-content: center
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, .6);
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, .05);
+            border-radius: 12px
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            box-shadow: 0 0 6px currentColor
+        }
+
+        /* Replay */
+        .replay-controls {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px;
+            margin-bottom: 16px;
+            background: rgba(20, 20, 30, .6);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, .08)
+        }
+
+        .replay-date {
+            flex: 1
+        }
+
+        .replay-date h4 {
+            font-size: 15px;
+            font-weight: 600
+        }
+
+        .replay-date small {
+            font-size: 11px;
+            color: #a78bfa
+        }
+
+        .play-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #22d3ee, #3b82f6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            border: none;
+            color: #000;
+            box-shadow: 0 0 20px rgba(34, 211, 238, .4);
+            transition: transform .2s
+        }
+
+        .play-btn:hover {
+            transform: scale(1.05)
+        }
+
+        .speed-btn {
+            padding: 6px 12px;
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            color: #fff;
+            background: rgba(255, 255, 255, .1)
+        }
+
+        .time-block {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            margin: 24px 0 12px;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .time-block::after {
+            content: '';
+            height: 1px;
+            flex: 1;
+            background: rgba(255, 255, 255, .1)
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 8px;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: all .5s cubic-bezier(0.2, 0.8, 0.2, 1)
+        }
+
+        .timeline-item.revealed {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        .timeline-item.current .tl-dot {
+            background: #22d3ee;
+            box-shadow: 0 0 12px rgba(34, 211, 238, .8);
+            transform: scale(1.2)
+        }
+
+        .timeline-item.current .tl-card {
+            border-color: rgba(34, 211, 238, .3);
+            background: rgba(34, 211, 238, .08)
+        }
+
+        .tl-line {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 16px;
+            padding-top: 6px
+        }
+
+        .tl-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .2);
+            transition: .3s;
+            margin-bottom: 4px
+        }
+
+        .tl-stem {
+            width: 2px;
+            flex: 1;
+            background: rgba(255, 255, 255, .08);
+            border-radius: 1px
+        }
+
+        .tl-card {
+            flex: 1;
+            padding: 14px;
+            margin-bottom: 8px;
+            transition: .3s
+        }
+
+        .tl-card small {
+            font-size: 11px;
+            color: #22d3ee;
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: block
+        }
+
+        .tl-card h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0 0 4px
+        }
+
+        .tl-card p {
+            font-size: 12px;
+            color: rgba(255, 255, 255, .5)
+        }
+
+        /* Stories */
+        .story-hero {
+            text-align: center;
+            padding: 30px 20px;
+            margin-bottom: 20px;
+            background: linear-gradient(180deg, rgba(30, 30, 40, .6) 0%, rgba(30, 30, 40, .2) 100%)
+        }
+
+        .story-hero .s-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, .2))
+        }
+
+        .story-hero h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 6px
+        }
+
+        .story-hero p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, .5)
+        }
+
+        .story-card {
+            margin-bottom: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, .08)
+        }
+
+        .story-card-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, .02)
+        }
+
+        .story-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2)
+        }
+
+        .story-card-header .s-text {
+            flex: 1
+        }
+
+        .story-card-header .s-text h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 2px
+        }
+
+        .story-card-header .s-text small {
+            font-size: 12px;
+            color: rgba(255, 255, 255, .4)
+        }
+
+        .story-card-header .s-count {
+            font-size: 22px;
+            font-weight: 800;
+            color: rgba(255, 255, 255, .8)
+        }
+
+        .story-expand {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height .4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            background: rgba(0, 0, 0, .2)
+        }
+
+        .story-expand.open {
+            max-height: 600px
+        }
+
+        .story-expand-inner {
+            padding: 0 16px 20px;
+            border-top: 1px solid rgba(255, 255, 255, .05)
+        }
+
+        .story-expand-inner p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, .7);
+            line-height: 1.6;
+            margin: 16px 0
+        }
+
+        .story-stats {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px
+        }
+
+        .story-stat {
+            flex: 1;
+            text-align: center;
+            padding: 12px 8px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid rgba(255, 255, 255, .05)
+        }
+
+        .story-stat .ss-val {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff
+        }
+
+        .story-stat .ss-lbl {
+            font-size: 10px;
+            color: rgba(255, 255, 255, .4);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px
+        }
+
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px
+        }
+
+        .bar-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, .6);
+            width: 70px;
+            font-weight: 500
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, .08);
+            border-radius: 3px;
+            overflow: hidden
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            box-shadow: 0 0 10px currentColor
+        }
+
+        .bar-count {
+            font-size: 12px;
+            color: rgba(255, 255, 255, .4);
+            width: 24px;
+            text-align: right;
+            font-weight: 600
+        }
+
+        /* Search Mode */
+        .search-modes {
+            display: flex;
+            gap: 8px;
+            padding: 4px 0 16px
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: .3s;
+            border: 1px solid transparent
+        }
+
+        .mode-btn.active-search {
+            background: rgba(167, 139, 250, .15);
+            color: #a78bfa;
+            border-color: rgba(167, 139, 250, .3);
+            text-shadow: 0 0 8px rgba(167, 139, 250, .4)
+        }
+
+        .mode-btn.active-reason {
+            background: rgba(34, 211, 238, .15);
+            color: #22d3ee;
+            border-color: rgba(34, 211, 238, .3);
+            text-shadow: 0 0 8px rgba(34, 211, 238, .4)
+        }
+
+        .mode-btn.inactive {
+            background: rgba(255, 255, 255, .05);
+            color: rgba(255, 255, 255, .4)
+        }
+
+        .reasoning-chain {
+            margin: 16px 0;
+            padding-left: 10px;
+            border-left: 2px solid rgba(255, 255, 255, .05)
+        }
+
+        .reason-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+            animation: fadeIn .3s ease
+        }
+
+        .reason-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22d3ee;
+            margin-top: 6px;
+            flex-shrink: 0;
+            box-shadow: 0 0 8px #22d3ee
+        }
+
+        .reason-step strong {
+            font-size: 12px;
+            color: #fff;
+            display: block;
+            margin-bottom: 2px
+        }
+
+        .reason-step span {
+            font-size: 11px;
+            color: rgba(255, 255, 255, .5)
+        }
+
+        .ai-answer {
+            padding: 16px;
+            border-radius: 16px;
+            background: rgba(34, 211, 238, .08);
+            border: 1px solid rgba(34, 211, 238, .2);
+            margin: 16px 0;
+            box-shadow: 0 4px 20px rgba(34, 211, 238, .05)
+        }
+
+        .ai-answer .ai-label {
+            font-size: 12px;
+            color: #22d3ee;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px
+        }
+
+        .ai-answer p {
+            font-size: 13px;
+            color: rgba(255, 255, 255, .8);
+            line-height: 1.6
+        }
+
+        /* Settings */
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0 24px
+        }
+
+        .settings-header h2 {
+            font-size: 24px;
+            font-weight: 700
+        }
+
+        .settings-done {
+            color: #a78bfa;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer
+        }
+
+        .settings-section {
+            margin-bottom: 24px
+        }
+
+        .settings-section h3 {
+            font-size: 13px;
+            color: rgba(255, 255, 255, .5);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            padding-left: 4px
+        }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px
+        }
+
+        .setting-row .s-icon {
+            font-size: 20px;
+            width: 32px;
+            text-align: center;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, .3))
+        }
+        }
+
+        .setting-row .s-text {
+            flex: 1
+        }
+
+        .setting-row .s-text h4 {
+            font-size: 13px;
+            font-weight: 500
+        }
+
+        .setting-row .s-text small {
+            font-size: 10px;
+            color: rgba(255, 255, 255, .3)
+        }
+
+        .toggle {
+            width: 44px;
+            height: 24px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, .15);
+            position: relative;
+            cursor: pointer;
+            transition: .3s
+        }
+
+        .toggle.on {
+            background: #22c55e
+        }
+
+        .toggle-knob {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: .3s
+        }
+
+        .toggle.on .toggle-knob {
+            left: 22px
+        }
+
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 600
+        }
+
+        .status-active {
+            background: rgba(34, 197, 94, .15);
+            color: #22c55e
+        }
+
+        .danger-row {
+            color: #ef4444;
+            cursor: pointer
+        }
+
+        .danger-row h4 {
+            color: #ef4444 !important
+        }
+
+        .memory-controls {
+            margin-top: 8px
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px
+        }
+
+        .control-row .cr-icon {
+            font-size: 14px;
+            width: 24px;
+            text-align: center
+        }
+
+        .control-row .cr-text {
+            flex: 1;
+            font-size: 12px
+        }
+
+        .control-bar {
+            width: 80px;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, .08);
+            overflow: hidden
+        }
+
+        .control-fill {
+            height: 100%;
+            border-radius: 3px
+        }
+
+        .mini-toggle {
+            width: 36px;
+            height: 18px;
+            border-radius: 9px;
+            background: rgba(255, 255, 255, .12);
+            position: relative;
+            cursor: pointer;
+            transition: .3s
+        }
+
+        .mini-toggle.on {
+            background: #22c55e
+        }
+
+        .mini-toggle-knob {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #fff;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: .3s
+        }
+
+        .mini-toggle.on .mini-toggle-knob {
+            left: 20px
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: .6
+            }
+
+            50% {
+                opacity: 1
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>🧠 AI Memory Assistant</h1>
+        <p>On-device Personal Recall — Privacy-first AI</p>
+        <div class="badges">
+            <span class="badge">SwiftUI</span><span class="badge">Core ML</span><span
+                class="badge">NaturalLanguage</span>
+            <span class="badge">Spotlight</span><span class="badge">App Intents</span><span class="badge">Siri</span>
+        </div>
+    </div>
+
+    <div class="phone">
+        <div class="notch"></div>
+        <div class="screen" id="screen">
+
+            <!-- HOME PAGE -->
+            <div class="page active" id="page-home">
+                <div class="home-header">
+                    <div>
+                        <h2>Memory</h2><small>Your personal AI recall</small>
+                    </div>
+                    <div class="header-btns">
+                        <div class="header-btn glass" onclick="showPage('timeline')">🕐</div>
+                        <div class="header-btn glass" onclick="showPage('settings')">⚙️</div>
+                    </div>
+                </div>
+                <div class="search-bar glass" onclick="showPage('search')">
+                    <span>🔍</span><span>Ask anything about your memories…</span><span>🎤</span>
+                </div>
+                <div class="stats">
+                    <div class="stat-card glass">
+                        <div class="icon">🧠</div>
+                        <div class="val">142</div>
+                        <div class="lbl">Total</div>
+                    </div>
+                    <div class="stat-card glass">
+                        <div class="icon">🍰</div>
+                        <div class="val">8</div>
+                        <div class="lbl">Today</div>
+                    </div>
+                    <div class="stat-card glass">
+                        <div class="icon">⭐</div>
+                        <div class="val">23</div>
+                        <div class="lbl">Starred</div>
+                    </div>
+                </div>
+                <div class="section-header">
+                    <h3>AI Features</h3>
+                </div>
+                <div class="features-scroll">
+                    <div class="feature-card glass" onclick="showPage('graph')">
+                        <div class="feature-icon" style="background:linear-gradient(135deg,#7c3aed,#3b82f6)">🔗</div>
+                        <h4>Memory Graph</h4>
+                        <p>Explore connections</p>
+                    </div>
+                    <div class="feature-card glass" onclick="showPage('replay')">
+                        <div class="feature-icon" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">▶️</div>
+                        <h4>Rewind Day</h4>
+                        <p>Replay yesterday</p>
+                    </div>
+                    <div class="feature-card glass" onclick="showPage('stories')">
+                        <div class="feature-icon" style="background:linear-gradient(135deg,#ec4899,#f97316)">📖</div>
+                        <h4>Life Stories</h4>
+                        <p>AI-generated journal</p>
+                    </div>
+                </div>
+                <div class="section-header">
+                    <h3>Categories</h3>
+                </div>
+                <div class="cat-scroll">
+                    <div class="cat-chip active">All</div>
+                    <div class="cat-chip">📋 Clipboard</div>
+                    <div class="cat-chip">📁 File</div>
+                    <div class="cat-chip">💬 Message</div>
+                    <div class="cat-chip">🔗 Link</div>
+                </div>
+                <div class="section-header">
+                    <h3>Recent Memories</h3><a>See All</a>
+                </div>
+                <div class="memory-card glass">
+                    <div class="m-icon">📝</div>
+                    <div class="m-body">
+                        <h4>Meeting Notes</h4>
+                        <p>Discussed Q3 roadmap with design team. Key decisions on new features.</p><small>2 hours
+                            ago</small>
+                    </div>
+                    <div class="m-star">⭐</div>
+                </div>
+                <div class="memory-card glass">
+                    <div class="m-icon">🔗</div>
+                    <div class="m-body">
+                        <h4>SwiftUI Tutorial Link</h4>
+                        <p>developer.apple.com/tutorials/swiftui</p><small>4 hours ago</small>
+                    </div>
+                    <div class="m-star"></div>
+                </div>
+                <div class="memory-card glass">
+                    <div class="m-icon">📋</div>
+                    <div class="m-body">
+                        <h4>API Key</h4>
+                        <p>sk-proj-abc123...copied from Slack</p><small>Yesterday</small>
+                    </div>
+                    <div class="m-star">⭐</div>
+                </div>
+                <div class="memory-card glass">
+                    <div class="m-icon">📁</div>
+                    <div class="m-body">
+                        <h4>Project Proposal.pdf</h4>
+                        <p>Q4 proposal document for stakeholder review</p><small>Yesterday</small>
+                    </div>
+                    <div class="m-star"></div>
+                </div>
+            </div>
+
+            <!-- GRAPH PAGE -->
+            <div class="page" id="page-graph">
+                <div class="graph-header">
+                    <h2>Memory Graph</h2><span class="graph-done" onclick="showPage('home')">Done</span>
+                </div>
+                <canvas id="graphCanvas" width="348" height="380"></canvas>
+                <div class="graph-legend">
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#22c55e"></div>People
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#ec4899"></div>Places
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#3b82f6"></div>Orgs
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#f97316"></div>Topics
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#a78bfa"></div>Categories
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPLAY PAGE -->
+            <div class="page" id="page-replay">
+                <div class="graph-header">
+                    <h2>Rewind My Day</h2><span class="graph-done" onclick="showPage('home')">Done</span>
+                </div>
+                <div class="replay-controls">
+                    <div class="replay-date">
+                        <h4>Yesterday</h4><small>8 moments captured</small>
+                    </div>
+                    <div class="speed-btn glass">1.0×</div>
+                    <button class="play-btn" id="playBtn" onclick="toggleReplay()">▶</button>
+                </div>
+                <div id="replayTimeline">
+                    <div class="time-block">🌅 Morning</div>
+                    <div class="timeline-item" data-idx="0">
+                        <div class="tl-line">
+                            <div class="tl-dot"></div>
+                            <div class="tl-stem"></div>
+                        </div>
+                        <div class="tl-card glass"><small>8:30 AM</small>
+                            <h4>Email from Rahul</h4>
+                            <p>Project deadline moved to Friday</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item" data-idx="1">
+                        <div class="tl-line">
+                            <div class="tl-dot"></div>
+                            <div class="tl-stem"></div>
+                        </div>
+                        <div class="tl-card glass"><small>9:15 AM</small>
+                            <h4>Copied API docs link</h4>
+                            <p>developer.apple.com/documentation</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item" data-idx="2">
+                        <div class="tl-line">
+                            <div class="tl-dot"></div>
+                            <div class="tl-stem"></div>
+                        </div>
+                        <div class="tl-card glass"><small>10:45 AM</small>
+                            <h4>Design Review.pdf</h4>
+                            <p>Saved from Downloads folder</p>
+                        </div>
+                    </div>
+                    <div class="time-block">☀️ Afternoon</div>
+                    <div class="timeline-item" data-idx="3">
+                        <div class="tl-line">
+                            <div class="tl-dot"></div>
+                            <div class="tl-stem"></div>
+                        </div>
+                        <div class="tl-card glass"><small>1:20 PM</small>
+                            <h4>Campus café address</h4>
+                            <p>123 University Ave, copied from Maps</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item" data-idx="4">
+                        <div class="tl-line">
+                            <div class="tl-dot"></div>
+                            <div class="tl-stem"></div>
+                        </div>
+                        <div class="tl-card glass"><small>3:00 PM</small>
+                            <h4>Meeting Notes</h4>
+                            <p>Discussed Q3 roadmap with design team</p>
+                        </div>
+                    </div>
+                    <div class="time-block">🌇 Evening</div>
+                    <div class="timeline-item" data-idx="5">
+                        <div class="tl-line">
+                            <div class="tl-dot"></div>
+                            <div class="tl-stem"></div>
+                        </div>
+                        <div class="tl-card glass"><small>6:15 PM</small>
+                            <h4>SwiftUI article</h4>
+                            <p>Bookmarked from Safari</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item" data-idx="6">
+                        <div class="tl-line">
+                            <div class="tl-dot"></div>
+                            <div class="tl-stem"></div>
+                        </div>
+                        <div class="tl-card glass"><small>7:30 PM</small>
+                            <h4>Mom's recipe</h4>
+                            <p>Screenshot saved from Messages</p>
+                        </div>
+                    </div>
+                    <div class="time-block">🌙 Night</div>
+                    <div class="timeline-item" data-idx="7">
+                        <div class="tl-line">
+                            <div class="tl-dot"></div>
+                            <div class="tl-stem"></div>
+                        </div>
+                        <div class="tl-card glass"><small>10:00 PM</small>
+                            <h4>Journal entry</h4>
+                            <p>Today was productive. Finished the design...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STORIES PAGE -->
+            <div class="page" id="page-stories">
+                <div class="graph-header">
+                    <h2>Life Stories</h2><span class="graph-done" onclick="showPage('home')">Done</span>
+                </div>
+                <div class="story-hero glass">
+                    <div class="s-icon">📖</div>
+                    <h2>Your Life Journal</h2>
+                    <p>AI-generated stories from your memories</p>
+                </div>
+                <div class="story-card glass" onclick="toggleStory(0)">
+                    <div class="story-card-header">
+                        <div class="story-icon" style="background:linear-gradient(135deg,#667eea,#764ba2)">☀️</div>
+                        <div class="s-text">
+                            <h4>Yesterday</h4><small>Feb 18, 2026</small>
+                        </div>
+                        <div class="s-count">12</div><span style="font-size:10px;color:rgba(255,255,255,.3)">▼</span>
+                    </div>
+                    <div class="story-expand" id="story-0">
+                        <div class="story-expand-inner">
+                            <p>Yesterday was a busy day with 12 moments captured. Your activity focused on Clipboard,
+                                Files, and Links. Key people: Rahul, Mom. A highly active period — your knowledge base
+                                is growing fast! 🚀</p>
+                            <div class="story-stats">
+                                <div class="story-stat">
+                                    <div class="ss-val">12</div>
+                                    <div class="ss-lbl">Memories</div>
+                                </div>
+                                <div class="story-stat">
+                                    <div class="ss-val">3</div>
+                                    <div class="ss-lbl">Files</div>
+                                </div>
+                                <div class="story-stat">
+                                    <div class="ss-val">5</div>
+                                    <div class="ss-lbl">Copied</div>
+                                </div>
+                                <div class="story-stat">
+                                    <div class="ss-val">4</div>
+                                    <div class="ss-lbl">Links</div>
+                                </div>
+                            </div>
+                            <div class="bar-row"><span class="bar-label">Clipboard</span>
+                                <div class="bar-track">
+                                    <div class="bar-fill"
+                                        style="width:45%;background:linear-gradient(90deg,#667eea,#764ba2)"></div>
+                                </div><span class="bar-count">5</span>
+                            </div>
+                            <div class="bar-row"><span class="bar-label">Links</span>
+                                <div class="bar-track">
+                                    <div class="bar-fill"
+                                        style="width:35%;background:linear-gradient(90deg,#667eea,#764ba2)"></div>
+                                </div><span class="bar-count">4</span>
+                            </div>
+                            <div class="bar-row"><span class="bar-label">Files</span>
+                                <div class="bar-track">
+                                    <div class="bar-fill"
+                                        style="width:25%;background:linear-gradient(90deg,#667eea,#764ba2)"></div>
+                                </div><span class="bar-count">3</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="story-card glass" onclick="toggleStory(1)">
+                    <div class="story-card-header">
+                        <div class="story-icon" style="background:linear-gradient(135deg,#f093fb,#f5576c)">📅</div>
+                        <div class="s-text">
+                            <h4>This Week</h4><small>Feb 14 — Today</small>
+                        </div>
+                        <div class="s-count">47</div><span style="font-size:10px;color:rgba(255,255,255,.3)">▼</span>
+                    </div>
+                    <div class="story-expand" id="story-1">
+                        <div class="story-expand-inner">
+                            <p>This week you've been active with 47 memories recorded across your devices. Your activity
+                                focused on Messages, Clipboard, and Files. Key people: Rahul, Priya, Dr. Shah. Steady
+                                progress in building your personal knowledge graph. 📊</p>
+                            <div class="story-stats">
+                                <div class="story-stat">
+                                    <div class="ss-val">47</div>
+                                    <div class="ss-lbl">Memories</div>
+                                </div>
+                                <div class="story-stat">
+                                    <div class="ss-val">8</div>
+                                    <div class="ss-lbl">Files</div>
+                                </div>
+                                <div class="story-stat">
+                                    <div class="ss-val">18</div>
+                                    <div class="ss-lbl">Copied</div>
+                                </div>
+                                <div class="story-stat">
+                                    <div class="ss-val">12</div>
+                                    <div class="ss-lbl">Links</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="story-card glass" onclick="toggleStory(2)">
+                    <div class="story-card-header">
+                        <div class="story-icon" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">📊</div>
+                        <div class="s-text">
+                            <h4>Last 30 Days</h4><small>Monthly Highlights</small>
+                        </div>
+                        <div class="s-count">142</div><span style="font-size:10px;color:rgba(255,255,255,.3)">▼</span>
+                    </div>
+                    <div class="story-expand" id="story-2">
+                        <div class="story-expand-inner">
+                            <p>Over the past 30 days, you've accumulated 142 memories. Your activity was diverse —
+                                spanning Files, Clipboard, Messages, and Links. A highly active period — your knowledge
+                                base is growing fast! 🚀</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEARCH PAGE -->
+            <div class="page" id="page-search">
+                <div style="padding:16px 0">
+                    <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">
+                        <div class="glass" style="flex:1;display:flex;align-items:center;gap:8px;padding:10px 12px">
+                            <span id="searchIcon">🔍</span>
+                            <input type="text" id="searchInput" placeholder="Ask about your memories…"
+                                style="background:none;border:none;color:#fff;font-size:14px;outline:none;width:100%">
+                        </div>
+                        <span style="font-size:13px;color:rgba(255,255,255,.5);cursor:pointer"
+                            onclick="showPage('home')">Cancel</span>
+                    </div>
+                    <div class="search-modes">
+                        <div class="mode-btn active-search" id="modeSearch" onclick="setSearchMode('search')">🔍 Search
+                        </div>
+                        <div class="mode-btn inactive" id="modeReason" onclick="setSearchMode('reason')">🧠 AI Reasoning
+                        </div>
+                    </div>
+                    <div id="searchSuggestions">
+                        <h3 style="font-size:13px;color:rgba(255,255,255,.5);margin:8px 0">Try asking</h3>
+                        <div id="suggestionsList"></div>
+                    </div>
+                    <div id="reasoningChain" style="display:none"></div>
+                    <div id="searchResults" style="display:none"></div>
+                </div>
+            </div>
+
+            <!-- TIMELINE PAGE -->
+            <div class="page" id="page-timeline">
+                <div class="graph-header">
+                    <h2>Timeline</h2><span class="graph-done" onclick="showPage('home')">Done</span>
+                </div>
+                <div class="time-block">Today</div>
+                <div class="memory-card glass">
+                    <div class="m-icon">📝</div>
+                    <div class="m-body">
+                        <h4>Meeting Notes</h4>
+                        <p>Discussed Q3 roadmap with design team</p><small>2 hours ago</small>
+                    </div>
+                    <div class="m-star">⭐</div>
+                </div>
+                <div class="memory-card glass">
+                    <div class="m-icon">🔗</div>
+                    <div class="m-body">
+                        <h4>SwiftUI Tutorial</h4>
+                        <p>developer.apple.com/tutorials</p><small>4 hours ago</small>
+                    </div>
+                </div>
+                <div class="time-block">Yesterday</div>
+                <div class="memory-card glass">
+                    <div class="m-icon">📋</div>
+                    <div class="m-body">
+                        <h4>API Key</h4>
+                        <p>sk-proj-abc123...</p><small>Yesterday 3:20 PM</small>
+                    </div>
+                    <div class="m-star">⭐</div>
+                </div>
+                <div class="memory-card glass">
+                    <div class="m-icon">📁</div>
+                    <div class="m-body">
+                        <h4>Project Proposal.pdf</h4>
+                        <p>Q4 proposal for stakeholder review</p><small>Yesterday 11:00 AM</small>
+                    </div>
+                </div>
+                <div class="memory-card glass">
+                    <div class="m-icon">💬</div>
+                    <div class="m-body">
+                        <h4>Address from Rahul</h4>
+                        <p>123 University Ave, Building 4</p><small>Yesterday 9:15 AM</small>
+                    </div>
+                </div>
+                <div class="time-block">This Week</div>
+                <div class="memory-card glass">
+                    <div class="m-icon">📁</div>
+                    <div class="m-body">
+                        <h4>Design Mockups.fig</h4>
+                        <p>Updated wireframes for v2 redesign</p><small>Mon 4:30 PM</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SETTINGS PAGE -->
+            <div class="page" id="page-settings">
+                <div class="settings-header">
+                    <h2>Settings</h2><span class="settings-done" onclick="showPage('home')">Done</span>
+                </div>
+                <div class="settings-section">
+                    <h3>🔒 Privacy</h3>
+                    <div class="glass" style="border-radius:14px;overflow:hidden">
+                        <div class="setting-row">
+                            <div class="s-icon">📋</div>
+                            <div class="s-text">
+                                <h4>Clipboard Monitoring</h4><small>Automatically capture copied text</small>
+                            </div>
+                            <div class="toggle on" onclick="this.classList.toggle('on')">
+                                <div class="toggle-knob"></div>
+                            </div>
+                        </div>
+                        <div class="setting-row" style="border-top:1px solid rgba(255,255,255,.04)">
+                            <div class="s-icon">📁</div>
+                            <div class="s-text">
+                                <h4>File Scanning</h4><small>Watch Documents folder for files</small>
+                            </div>
+                            <div class="toggle on" onclick="this.classList.toggle('on')">
+                                <div class="toggle-knob"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h3>🛡️ AI Memory Controls</h3>
+                    <div class="glass memory-controls" style="border-radius:14px;overflow:hidden">
+                        <div class="control-row">
+                            <div class="cr-icon">📁</div>
+                            <div class="cr-text">Files</div>
+                            <div class="control-bar">
+                                <div class="control-fill"
+                                    style="width:70%;background:linear-gradient(90deg,#a78bfa,#7c3aed)"></div>
+                            </div>
+                            <div class="mini-toggle on" onclick="this.classList.toggle('on')">
+                                <div class="mini-toggle-knob"></div>
+                            </div>
+                        </div>
+                        <div class="control-row" style="border-top:1px solid rgba(255,255,255,.03)">
+                            <div class="cr-icon">🌐</div>
+                            <div class="cr-text">Websites</div>
+                            <div class="control-bar">
+                                <div class="control-fill"
+                                    style="width:50%;background:linear-gradient(90deg,#60a5fa,#3b82f6)"></div>
+                            </div>
+                            <div class="mini-toggle on" onclick="this.classList.toggle('on')">
+                                <div class="mini-toggle-knob"></div>
+                            </div>
+                        </div>
+                        <div class="control-row" style="border-top:1px solid rgba(255,255,255,.03)">
+                            <div class="cr-icon">📋</div>
+                            <div class="cr-text">Clipboard</div>
+                            <div class="control-bar">
+                                <div class="control-fill"
+                                    style="width:85%;background:linear-gradient(90deg,#34d399,#10b981)"></div>
+                            </div>
+                            <div class="mini-toggle on" onclick="this.classList.toggle('on')">
+                                <div class="mini-toggle-knob"></div>
+                            </div>
+                        </div>
+                        <div class="control-row" style="border-top:1px solid rgba(255,255,255,.03)">
+                            <div class="cr-icon">💬</div>
+                            <div class="cr-text">Messages</div>
+                            <div class="control-bar">
+                                <div class="control-fill"
+                                    style="width:30%;background:linear-gradient(90deg,#f472b6,#ec4899)"></div>
+                            </div>
+                            <div class="mini-toggle" onclick="this.classList.toggle('on')">
+                                <div class="mini-toggle-knob"></div>
+                            </div>
+                        </div>
+                        <div class="control-row" style="border-top:1px solid rgba(255,255,255,.03)">
+                            <div class="cr-icon">📍</div>
+                            <div class="cr-text">Locations</div>
+                            <div class="control-bar">
+                                <div class="control-fill"
+                                    style="width:20%;background:linear-gradient(90deg,#fbbf24,#f59e0b)"></div>
+                            </div>
+                            <div class="mini-toggle" onclick="this.classList.toggle('on')">
+                                <div class="mini-toggle-knob"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h3>🔗 Integrations</h3>
+                    <div class="glass" style="border-radius:14px;overflow:hidden">
+                        <div class="setting-row">
+                            <div class="s-icon">🎤</div>
+                            <div class="s-text">
+                                <h4>Siri Integration</h4><small>"Recall [query] in Memory Assistant"</small>
+                            </div><span class="status-badge status-active">Active</span>
+                        </div>
+                        <div class="setting-row" style="border-top:1px solid rgba(255,255,255,.04)">
+                            <div class="s-icon">🔍</div>
+                            <div class="s-text">
+                                <h4>Spotlight Search</h4><small>Memories appear in system search</small>
+                            </div><span class="status-badge status-active">Active</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h3>⚠️ Danger Zone</h3>
+                    <div class="glass" style="border-radius:14px">
+                        <div class="setting-row danger-row">
+                            <div class="s-icon">🗑</div>
+                            <div class="s-text">
+                                <h4>Clear All Memories</h4><small>Permanently delete everything</small>
+                            </div><span style="color:rgba(255,255,255,.2)">›</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="nav">
+            <div class="nav-item active" id="nav-home" onclick="showPage('home')"><span>🏠</span>Home</div>
+            <div class="nav-item" id="nav-search" onclick="showPage('search')"><span>🔍</span>Search</div>
+            <div class="nav-item" id="nav-graph" onclick="showPage('graph')"><span>🔗</span>Graph</div>
+            <div class="nav-item" id="nav-replay" onclick="showPage('replay')"><span>⏪</span>Replay</div>
+            <div class="nav-item" id="nav-settings" onclick="showPage('settings')"><span>⚙️</span>Settings</div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            const nav = document.getElementById('nav-' + id);
+            if (nav) nav.classList.add('active');
+            if (id === 'graph') initGraph();
+            if (id === 'search') updateSuggestions();
+            document.getElementById('screen').scrollTop = 0;
+        }
+
+        // Graph
+        const graphNodes = [
+            { x: 174, y: 190, r: 24, label: 'Rahul', color: '#22c55e', vx: 0, vy: 0 },
+            { x: 100, y: 120, r: 18, label: 'Mom', color: '#22c55e', vx: 0, vy: 0 },
+            { x: 260, y: 100, r: 16, label: 'Priya', color: '#22c55e', vx: 0, vy: 0 },
+            { x: 80, y: 260, r: 20, label: 'Campus', color: '#ec4899', vx: 0, vy: 0 },
+            { x: 280, y: 240, r: 16, label: 'Café Mocha', color: '#ec4899', vx: 0, vy: 0 },
+            { x: 200, y: 50, r: 18, label: 'Apple', color: '#3b82f6', vx: 0, vy: 0 },
+            { x: 140, y: 310, r: 16, label: 'SwiftUI', color: '#f97316', vx: 0, vy: 0 },
+            { x: 240, y: 320, r: 14, label: 'CoreML', color: '#f97316', vx: 0, vy: 0 },
+            { x: 50, y: 180, r: 20, label: 'Files', color: '#a78bfa', vx: 0, vy: 0 },
+            { x: 310, y: 170, r: 18, label: 'Clipboard', color: '#a78bfa', vx: 0, vy: 0 },
+            { x: 174, y: 120, r: 16, label: 'Messages', color: '#a78bfa', vx: 0, vy: 0 },
+        ];
+        // ... (rest of graph logic same, just updated colors in array above) ...
+        const graphEdges = [
+            [0, 3], [0, 4], [0, 10], [0, 8], [1, 10], [1, 8], [2, 5], [2, 10],
+            [3, 6], [3, 7], [4, 0], [5, 6], [5, 7], [6, 7], [8, 9], [9, 10], [0, 5], [1, 3]
+        ];
+        let graphAnim = null;
+        function initGraph() {
+            const c = document.getElementById('graphCanvas');
+            const ctx = c.getContext('2d');
+            const W = c.width, H = c.height;
+            // Re-randomize for liveness
+            graphNodes.forEach((n, i) => {
+                if (n.vx === 0) { // only first time
+                    const a = (2 * Math.PI / graphNodes.length) * i;
+                    n.x = W / 2 + Math.cos(a) * 120;
+                    n.y = H / 2 + Math.sin(a) * 120;
+                }
+            });
+            if (graphAnim) cancelAnimationFrame(graphAnim);
+            function tick() {
+                for (let i = 0; i < graphNodes.length; i++) {
+                    let fx = 0, fy = 0;
+                    for (let j = 0; j < graphNodes.length; j++) {
+                        if (i === j) continue;
+                        const dx = graphNodes[i].x - graphNodes[j].x, dy = graphNodes[i].y - graphNodes[j].y;
+                        const d = Math.max(Math.sqrt(dx * dx + dy * dy), 1);
+                        const f = 1500 / (d * d); // Repulsion
+                        fx += dx / d * f; fy += dy / d * f;
+                    }
+                    graphEdges.forEach(([a, b]) => {
+                        if (a === i || b === i) {
+                            const o = a === i ? b : a;
+                            fx += (graphNodes[o].x - graphNodes[i].x) * .02; // Attraction
+                            fy += (graphNodes[o].y - graphNodes[i].y) * .02;
+                        }
+                    });
+                    // Center gravity
+                    fx += (W / 2 - graphNodes[i].x) * .015;
+                    fy += (H / 2 - graphNodes[i].y) * .015;
+
+                    graphNodes[i].vx = (graphNodes[i].vx + fx) * .85;
+                    graphNodes[i].vy = (graphNodes[i].vy + fy) * .85;
+                    graphNodes[i].x += graphNodes[i].vx;
+                    graphNodes[i].y += graphNodes[i].vy;
+                    // Bounds
+                    const pad = 30;
+                    if (graphNodes[i].x < pad) graphNodes[i].x = pad;
+                    if (graphNodes[i].x > W - pad) graphNodes[i].x = W - pad;
+                    if (graphNodes[i].y < pad) graphNodes[i].y = pad;
+                    if (graphNodes[i].y > H - pad) graphNodes[i].y = H - pad;
+                }
+                ctx.clearRect(0, 0, W, H);
+                // Draw edges
+                graphEdges.forEach(([a, b]) => {
+                    ctx.beginPath(); ctx.moveTo(graphNodes[a].x, graphNodes[a].y); ctx.lineTo(graphNodes[b].x, graphNodes[b].y);
+                    const grad = ctx.createLinearGradient(graphNodes[a].x, graphNodes[a].y, graphNodes[b].x, graphNodes[b].y);
+                    grad.addColorStop(0, graphNodes[a].color + '44');
+                    grad.addColorStop(1, graphNodes[b].color + '44');
+                    ctx.strokeStyle = grad; ctx.lineWidth = 1.5; ctx.stroke();
+                });
+                // Draw nodes
+                graphNodes.forEach(n => {
+                    // Glow
+                    const glowInfo = ctx.createRadialGradient(n.x, n.y, n.r * 0.5, n.x, n.y, n.r * 2);
+                    glowInfo.addColorStop(0, n.color + '66');
+                    glowInfo.addColorStop(1, 'transparent');
+                    ctx.fillStyle = glowInfo; ctx.beginPath(); ctx.arc(n.x, n.y, n.r * 2, 0, Math.PI * 2); ctx.fill();
+
+                    // Solid Core
+                    ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+                    ctx.fillStyle = '#000'; ctx.fill();
+                    ctx.strokeStyle = n.color; ctx.lineWidth = 2; ctx.stroke();
+
+                    // Label
+                    ctx.shadowColor = '#000'; ctx.shadowBlur = 4;
+                    ctx.fillStyle = '#fff'; ctx.font = 'bold 11px -apple-system'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText(n.label, n.x, n.y + n.r + 14);
+                    ctx.shadowBlur = 0;
+
+                    // Icon placeholder (simple dot for now)
+                    ctx.beginPath(); ctx.arc(n.x, n.y, 4, 0, Math.PI * 2); ctx.fillStyle = n.color; ctx.fill();
+                });
+                graphAnim = requestAnimationFrame(tick);
+            }
+            tick();
+        }
+
+        // Replay
+        let replayInterval = null, replayIdx = -1;
+        function toggleReplay() {
+            const btn = document.getElementById('playBtn');
+            const items = document.querySelectorAll('.timeline-item');
+            if (replayInterval) {
+                clearInterval(replayInterval); replayInterval = null; btn.textContent = '▶'; return;
+            }
+            btn.textContent = '⏸'; replayIdx = -1;
+            items.forEach(i => { i.classList.remove('revealed', 'current') });
+            replayInterval = setInterval(() => {
+                replayIdx++;
+                if (replayIdx >= items.length) { clearInterval(replayInterval); replayInterval = null; btn.textContent = '▶'; return; }
+                items.forEach(i => i.classList.remove('current'));
+                items[replayIdx].classList.add('revealed', 'current');
+                items[replayIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 800);
+        }
+
+        // Stories
+        function toggleStory(idx) {
+            const el = document.getElementById('story-' + idx);
+            el.classList.toggle('open');
+        }
+
+        // Search
+        let searchMode = 'search';
+        const searchSuggestions = ['Where did I save that PDF?', 'What was the address from Messages?', 'Show my recent links', 'Find the meeting notes', 'What did I copy yesterday?'];
+        const reasonSuggestions = ["What was that place where I met Rahul?", "Show files related to the design meeting", "What did I work on yesterday morning?", "Find everything about the campus visit"];
+
+        function setSearchMode(mode) {
+            searchMode = mode;
+            document.getElementById('modeSearch').className = 'mode-btn ' + (mode === 'search' ? 'active-search' : 'inactive');
+            document.getElementById('modeReason').className = 'mode-btn ' + (mode === 'reason' ? 'active-reason' : 'inactive');
+            document.getElementById('searchIcon').textContent = mode === 'reason' ? '🧠' : '🔍';
+            document.getElementById('searchInput').placeholder = mode === 'reason' ? 'Ask a complex question…' : 'Ask about your memories…';
+            updateSuggestions();
+            document.getElementById('reasoningChain').style.display = 'none';
+            document.getElementById('searchResults').style.display = 'none';
+        }
+        function updateSuggestions() {
+            const list = searchMode === 'reason' ? reasonSuggestions : searchSuggestions;
+            const icon = searchMode === 'reason' ? '🧠' : '✨';
+            document.getElementById('suggestionsList').innerHTML = list.map(s =>
+                `<div style="display:flex;align-items:center;gap:12px;padding:12px 10px;cursor:pointer;border-radius:12px;transition:.2s;margin-bottom:4px" onclick="runSearch('${s}')" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='transparent'">
+      <span style="font-size:16px">${icon}</span>
+      <span style="font-size:14px;color:rgba(255,255,255,.7);flex:1">${s}</span>
+      <span style="font-size:12px;color:rgba(255,255,255,.3)">↗</span>
+    </div>`
+            ).join('');
+            document.getElementById('searchSuggestions').style.display = 'block';
+        }
+        function runSearch(q) {
+            document.getElementById('searchInput').value = q;
+            document.getElementById('searchSuggestions').style.display = 'none';
+            if (searchMode === 'reason') { showReasoning(q) }
+            else { showSearchResults(q) }
+        }
+        function showReasoning(q) {
+            const chain = document.getElementById('reasoningChain');
+            const results = document.getElementById('searchResults');
+            chain.style.display = 'block'; chain.innerHTML = ''; results.style.display = 'block';
+            const steps = [
+                { t: '🔍 Analyzing question', d: 'Extracting entities, time, and intent…' },
+                { t: '📋 Query parsed', d: 'People: Rahul | Places: campus | Time: yesterday' },
+                { t: '👤 Searching people', d: 'Looking for mentions of Rahul…' },
+                { t: '✅ People search', d: 'Found 8 related memories' },
+                { t: '📍 Searching places', d: 'Looking for campus…' },
+                { t: '⏰ Filtering by time', d: 'Narrowing to yesterday…' },
+                { t: '📊 Ranking results', d: 'Deduplicating and ranking by relevance…' },
+                { t: '💡 Answer ready', d: 'Based on 5 related memories' }
+            ];
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i >= steps.length) {
+                    clearInterval(interval);
+                    results.innerHTML = `<div class="ai-answer"><div class="ai-label">🧠 AI Answer</div><p>Based on 5 related memories:<br>📌 "Campus café address" — 123 University Ave, copied from Maps<br>📅 Yesterday, 1:20 PM<br>👤 Connected to: Rahul</p></div>
+      <div style="font-size:11px;color:rgba(255,255,255,.3);margin:8px 0">5 related memories</div>
+      <div class="memory-card glass"><div class="m-icon">📍</div><div class="m-body"><h4>Campus café address</h4><p>123 University Ave, Building 4</p><small>Yesterday 1:20 PM</small></div></div>
+      <div class="memory-card glass"><div class="m-icon">📝</div><div class="m-body"><h4>Meeting with Rahul</h4><p>Discussed project timeline at campus</p><small>Yesterday 3:00 PM</small></div></div>`;
+                    return;
+                }
+                chain.innerHTML += `<div class="reason-step"><div class="reason-dot"></div><div><strong>${steps[i].t}</strong><br><span>${steps[i].d}</span></div></div>`;
+                i++;
+            }, 300);
+        }
+        function showSearchResults(q) {
+            document.getElementById('searchResults').style.display = 'block';
+            document.getElementById('searchResults').innerHTML = `
+    <div style="font-size:11px;color:rgba(255,255,255,.3);margin:8px 0">3 memories found</div>
+    <div class="memory-card glass"><div class="m-icon">📝</div><div class="m-body"><h4>Meeting Notes</h4><p>Discussed Q3 roadmap with design team</p><small>2 hours ago</small></div><div class="m-star">⭐</div></div>
+    <div class="memory-card glass"><div class="m-icon">📁</div><div class="m-body"><h4>Project Proposal.pdf</h4><p>Q4 proposal for stakeholder review</p><small>Yesterday</small></div></div>
+    <div class="memory-card glass"><div class="m-icon">🔗</div><div class="m-body"><h4>SwiftUI Tutorial</h4><p>developer.apple.com/tutorials</p><small>4 hours ago</small></div></div>`;
+        }
+        document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') runSearch(e.target.value) });
+    </script>
+</body>
+
+</html>
