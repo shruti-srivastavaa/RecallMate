@@ -1677,6 +1677,7 @@
             <div class="nav-item" id="nav-search" onclick="showPage('search')"><span>🔍</span>Search</div>
             <div class="nav-item" id="nav-graph" onclick="showPage('graph')"><span>🔗</span>Graph</div>
             <div class="nav-item" id="nav-replay" onclick="showPage('replay')"><span>⏪</span>Replay</div>
+            <div class="nav-item" id="nav-stories" onclick="showPage('stories')"><span>📖</span>Stories</div>
             <div class="nav-item" id="nav-settings" onclick="showPage('settings')"><span>⚙️</span>Settings</div>
         </div>
     </div>
@@ -1693,6 +1694,7 @@
             if (id === 'search') updateSuggestions();
             document.getElementById('screen').scrollTop = 0;
         }
+
 
         // Graph
         const graphNodes = [
@@ -1730,28 +1732,44 @@
             function tick() {
                 for (let i = 0; i < graphNodes.length; i++) {
                     let fx = 0, fy = 0;
+
+                    // Repulsion
                     for (let j = 0; j < graphNodes.length; j++) {
                         if (i === j) continue;
                         const dx = graphNodes[i].x - graphNodes[j].x, dy = graphNodes[i].y - graphNodes[j].y;
                         const d = Math.max(Math.sqrt(dx * dx + dy * dy), 1);
-                        const f = 1500 / (d * d); // Repulsion
+                        const f = 1500 / (d * d);
                         fx += dx / d * f; fy += dy / d * f;
                     }
+
+                    // Attraction
                     graphEdges.forEach(([a, b]) => {
                         if (a === i || b === i) {
                             const o = a === i ? b : a;
-                            fx += (graphNodes[o].x - graphNodes[i].x) * .02; // Attraction
+                            fx += (graphNodes[o].x - graphNodes[i].x) * .02;
                             fy += (graphNodes[o].y - graphNodes[i].y) * .02;
                         }
                     });
-                    // Center gravity
-                    fx += (W / 2 - graphNodes[i].x) * .015;
-                    fy += (H / 2 - graphNodes[i].y) * .015;
+
+                    // Center gravity & Orbital Rotation
+                    const cx = W / 2, cy = H / 2;
+                    fx += (cx - graphNodes[i].x) * .015;
+                    fy += (cy - graphNodes[i].y) * .015;
+
+                    // Orbital Force (The Motion!)
+                    const dx = graphNodes[i].x - cx;
+                    const dy = graphNodes[i].y - cy;
+                    const angle = Math.atan2(dy, dx);
+                    // Force tangent to radius
+                    const orbitForce = 0.08;
+                    fx += -Math.sin(angle) * orbitForce;
+                    fy += Math.cos(angle) * orbitForce;
 
                     graphNodes[i].vx = (graphNodes[i].vx + fx) * .85;
                     graphNodes[i].vy = (graphNodes[i].vy + fy) * .85;
                     graphNodes[i].x += graphNodes[i].vx;
                     graphNodes[i].y += graphNodes[i].vy;
+
                     // Bounds
                     const pad = 30;
                     if (graphNodes[i].x < pad) graphNodes[i].x = pad;
@@ -1787,13 +1805,52 @@
                     ctx.fillText(n.label, n.x, n.y + n.r + 14);
                     ctx.shadowBlur = 0;
 
-                    // Icon placeholder (simple dot for now)
+                    // Icon placeholder
                     ctx.beginPath(); ctx.arc(n.x, n.y, 4, 0, Math.PI * 2); ctx.fillStyle = n.color; ctx.fill();
                 });
                 graphAnim = requestAnimationFrame(tick);
             }
             tick();
         }
+
+        // Global Keyboard Support
+        document.addEventListener('keydown', (e) => {
+            const tabs = ['home', 'search', 'graph', 'replay', 'stories', 'settings'];
+
+            if (e.key === 'ArrowRight') {
+                const activeNav = tabs.find(t => {
+                    const el = document.getElementById('nav-' + t);
+                    return el && el.classList.contains('active');
+                }) || 'home';
+                const idx = tabs.indexOf(activeNav);
+                if (idx < tabs.length - 1) {
+                    const nextId = 'nav-' + tabs[idx + 1];
+                    if (document.getElementById(nextId)) document.getElementById(nextId).click();
+                }
+            }
+            if (e.key === 'ArrowLeft') {
+                const activeNav = tabs.find(t => {
+                    const el = document.getElementById('nav-' + t);
+                    return el && el.classList.contains('active');
+                }) || 'home';
+                const idx = tabs.indexOf(activeNav);
+                if (idx > 0) {
+                    const prevId = 'nav-' + tabs[idx - 1];
+                    if (document.getElementById(prevId)) document.getElementById(prevId).click();
+                }
+            }
+            // Search focus
+            if (e.key === '/' && !document.getElementById('searchInput').matches(':focus')) {
+                e.preventDefault();
+                showPage('search');
+                setTimeout(() => document.getElementById('searchInput').focus(), 100);
+            }
+            // Escape
+            if (e.key === 'Escape') {
+                showPage('home');
+                document.getElementById('searchInput').blur();
+            }
+        });
 
         // Replay
         let replayInterval = null, replayIdx = -1;
