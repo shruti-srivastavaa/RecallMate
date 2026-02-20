@@ -34,7 +34,7 @@ Views/          → SwiftUI screens (Home, Search, Timeline, Detail, Settings)
 
 ## Getting Started
 
-1. Open the `AIMemoryAssistant` folder in **Xcode 15+**
+1. Open the `RecallMate` folder in **Xcode 15+**
 2. Select an iOS 17+ simulator or device
 3. Build and run (`⌘R`)
 

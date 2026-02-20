@@ -2,20 +2,20 @@
 import PackageDescription
 
 let package = Package(
-    name: "AIMemoryAssistant",
+    name: "RecallMate",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "AIMemoryAssistant",
-            targets: ["AIMemoryAssistant"]
+            name: "RecallMate",
+            targets: ["RecallMate"]
         )
     ],
     targets: [
         .target(
-            name: "AIMemoryAssistant",
-            path: "Sources/AIMemoryAssistant",
+            name: "RecallMate",
+            path: "Sources/RecallMate",
             resources: [
                 .process("Resources")
             ]

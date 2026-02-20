@@ -40,7 +40,7 @@ struct PersistenceController {
     init(inMemory: Bool = false) {
         // Build the model programmatically
         let model = Self.createManagedObjectModel()
-        container = NSPersistentContainer(name: "AIMemoryAssistant", managedObjectModel: model)
+        container = NSPersistentContainer(name: "RecallMate", managedObjectModel: model)
 
         if inMemory {
             container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")

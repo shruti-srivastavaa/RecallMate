@@ -1,7 +1,7 @@
 import AppIntents
 
 /// Registers Siri shortcut phrases for the RecallMate.
-struct AIMemoryShortcuts: AppShortcutsProvider {
+struct RecallMateShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
             intent: RecallMemoryIntent(),

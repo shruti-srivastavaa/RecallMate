@@ -3,7 +3,7 @@ import CoreData
 
 /// Main entry point for the RecallMate app.
 @main
-struct AIMemoryAssistantApp: App {
+struct RecallMateApp: App {
     let persistence = PersistenceController.shared
     @StateObject private var clipboardMonitor: ClipboardMonitor
 
