@@ -1,7 +1,7 @@
 import SwiftUI
 import CoreData
 
-/// Main entry point for the AI Memory Assistant app.
+/// Main entry point for the RecallMate app.
 @main
 struct AIMemoryAssistantApp: App {
     let persistence = PersistenceController.shared

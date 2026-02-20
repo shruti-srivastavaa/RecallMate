@@ -3,7 +3,7 @@ import CoreData
 
 /// Siri / Shortcuts intent that lets users recall memories via natural language.
 ///
-/// Example: "Recall meeting notes in Memory Assistant"
+/// Example: "Recall meeting notes in RecallMate"
 struct RecallMemoryIntent: AppIntent {
     static var title: LocalizedStringResource = "Recall a Memory"
     static var description = IntentDescription("Search your memories using natural language.")

@@ -101,7 +101,7 @@ struct SettingsView: View {
                             VStack(spacing: 0) {
                                 integrationRow(
                                     title: "Siri Integration",
-                                    subtitle: "\"Recall [query] in Memory Assistant\"",
+                                    subtitle: "\"Recall [query] in RecallMate\"",
                                     icon: "mic.fill",
                                     color: .purple,
                                     status: "Active"
@@ -153,7 +153,7 @@ struct SettingsView: View {
                                         endPoint: .bottomTrailing
                                     )
                                 )
-                            Text("AI Memory Assistant")
+                            Text("RecallMate")
                                 .font(.caption)
                                 .fontWeight(.semibold)
                                 .foregroundStyle(.white.opacity(0.5))
